@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  backend:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8787:8787"
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
+    volumes:
+      # Optional: Mount .env file if you want to use a different one in Docker
+      - ./.env:/app/.env
+    restart: unless-stopped

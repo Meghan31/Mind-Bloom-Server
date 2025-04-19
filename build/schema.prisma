@@ -1,0 +1,55 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id             Int            @id @default(autoincrement())
+  username       String
+  email          String         @unique
+  password_hash  String
+  created_at     DateTime       @default(now())
+  updated_at     DateTime       @default(now()) @updatedAt
+  journalEntries JournalEntry[]
+
+  @@map("users")
+}
+
+model Affirmation {
+  id             Int            @id @default(autoincrement())
+  content        String
+  mood_type      String
+  created_at     DateTime       @default(now())
+  updated_at     DateTime       @default(now()) @updatedAt
+  journalEntries JournalEntry[]
+
+  @@map("affirmations")
+}
+
+model JournalEntry {
+  id             Int          @id @default(autoincrement())
+  user           User         @relation(fields: [user_id], references: [id])
+  user_id        Int
+  content        String
+  mood           String
+  affirmation    Affirmation? @relation(fields: [affirmation_id], references: [id])
+  affirmation_id Int?
+  entry_date     DateTime     @default(now())
+  created_at     DateTime     @default(now())
+  updated_at     DateTime     @default(now()) @updatedAt
+
+  @@index([user_id, entry_date])
+  @@map("journal_entries")
+}
