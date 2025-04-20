@@ -17,7 +17,7 @@ async function startServer() {
             process.exit(1);
         }
         // Start the server
-        await appServer_1.appServer.start(8787, (0, appConfig_1.configureApp)(environment_1.environment.fromEnv()));
+        await appServer_1.appServer.start(8080, (0, appConfig_1.configureApp)(environment_1.environment.fromEnv()));
     }
     catch (error) {
         console.error('Server startup failed:', error);

@@ -149,7 +149,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "/Users/meghasrivardhanpulakhandam/Desktop/Prisma-mind-bloom/backend/src/generated/prisma",
+      "value": "/Users/meghasrivardhanpulakhandam/Desktop/backend-mindbloom/src/generated/prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -163,7 +163,7 @@ const config = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "/Users/meghasrivardhanpulakhandam/Desktop/Prisma-mind-bloom/backend/prisma/schema.prisma",
+    "sourceFilePath": "/Users/meghasrivardhanpulakhandam/Desktop/backend-mindbloom/prisma/schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {

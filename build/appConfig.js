@@ -1,16 +1,4 @@
 "use strict";
-// // src/appConfig.ts
-// import cors from 'cors';
-// import express, { Express } from 'express';
-// import { databaseTemplate } from './databaseSupport/databaseTemplate';
-// import { Environment } from './environment';
-// import { health } from './handleHealth';
-// import { index } from './handleIndex';
-// import { registerAffirmationRoutes } from './routes/affirmationRoutes';
-// import { registerAuthRoutes } from './routes/authRoutes';
-// import { registerJournalRoutes } from './routes/journalRoutes';
-// import { registerTestRoutes } from './routes/testRoutes';
-// import { staticFileHandler } from './webSupport/staticFileHandler';
 var __makeTemplateObject = (this && this.__makeTemplateObject) || function (cooked, raw) {
     if (Object.defineProperty) { Object.defineProperty(cooked, "raw", { value: raw }); } else { cooked.raw = raw; }
     return cooked;
@@ -56,22 +44,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.configureApp = void 0;
-// export const configureApp = (environment: Environment) => (app: Express) => {
-// 	const dbTemplate = databaseTemplate.create(environment.databaseUrl);
-// 	// Middleware
-// 	app.use(cors()); // Enable CORS for the frontend to communicate with backend
-// 	app.use(express.json()); // Parse JSON bodies
-// 	// Basic routes
-// 	index.registerHandler(app);
-// 	health.registerHandler(app, dbTemplate);
-// 	// API Routes
-// 	registerAuthRoutes(app, dbTemplate);
-// 	registerJournalRoutes(app, dbTemplate);
-// 	registerAffirmationRoutes(app, dbTemplate);
-// 	registerTestRoutes(app); // Add test routes
-// 	// Serve static files
-// 	staticFileHandler.registerHandler(app);
-// };
 // src/appConfig.ts
 var cors_1 = __importDefault(require("cors"));
 var express_1 = __importDefault(require("express"));
@@ -84,7 +56,13 @@ var testRoutes_1 = require("./routes/testRoutes");
 var staticFileHandler_1 = require("./webSupport/staticFileHandler");
 var configureApp = function (environment) { return function (app) {
     // Middleware
-    app.use((0, cors_1.default)()); // Enable CORS for the frontend to communicate with backend
+    app.use((0, cors_1.default)({
+        origin: '*', // Or specify your frontend domains
+        methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+        allowedHeaders: ['Content-Type', 'Authorization'],
+        preflightContinue: false,
+        optionsSuccessStatus: 204,
+    })); // Enable CORS for the frontend to communicate with backend
     app.use(express_1.default.json()); // Parse JSON bodies
     // Basic routes
     handleIndex_1.index.registerHandler(app);

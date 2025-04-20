@@ -13,7 +13,7 @@
 		"collect": "npm run build:collect && node build/collect.js",
 		"analyze": "npm run build:analyze && node build/analyze.js",
 		"daily-quotes": "./bin/daily-quotes.sh",
-		"build": "tsc && cp -r src/views src/public src/routes src/lib src/databaseSupport src/webSupport src/generated/prisma/ src/testSupport databases bin scripts build/ && cp .env.example build/.env",
+		"build": "npx prisma generate && tsc src/app.ts --outDir build/ --esModuleInterop true && tsc && cp -r src/views src/public src/routes src/lib src/databaseSupport src/webSupport src/generated/prisma/ src/testSupport databases bin scripts build/",
 		"clean": "rm -rf ./build",
 		"watch": "nodemon src/app.ts",
 		"pretest": "npx ts-node scripts/checkStatus.ts",

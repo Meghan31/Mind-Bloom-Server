@@ -59,7 +59,7 @@ function startServer() {
                         process.exit(1);
                     }
                     // Start the server
-                    return [4 /*yield*/, appServer_1.appServer.start(8787, (0, appConfig_1.configureApp)(environment_1.environment.fromEnv()))];
+                    return [4 /*yield*/, appServer_1.appServer.start(8080, (0, appConfig_1.configureApp)(environment_1.environment.fromEnv()))];
                 case 2:
                     // Start the server
                     _a.sent();

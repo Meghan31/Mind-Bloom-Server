@@ -37,12 +37,7 @@
 		"src/collect.ts",
 		"src/analyze.ts"
 	],
-	"exclude": [
-		"src/**/*.test.ts",
-		"src/testSupport/**/*",
-		"build/**/*",
-		"node_modules"
-	],
+	"exclude": ["src/**/*.test.ts", "src/testSupport/**/*", "node_modules"],
 	"compilerOptions": {
 		"target": "ESNext",
 		"module": "commonjs",
