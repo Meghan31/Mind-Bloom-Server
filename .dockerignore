@@ -9,3 +9,6 @@ npm-debug.log
 .env.example
 .env.docker
 *.md
+README.md
+.vscode
+data/*.json

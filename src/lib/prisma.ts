@@ -1,83 +1,132 @@
+// // src/lib/prisma.ts
 // import { PrismaClient } from '@prisma/client';
 
-// // Create a singleton instance of PrismaClient
+// // Define the global variable type
+// declare global {
+// 	var prisma: PrismaClient | undefined;
+// }
+
+// // Create a singleton instance of PrismaClient with proper configuration
 // const prismaClientSingleton = () => {
 // 	return new PrismaClient({
-// 		log:
-// 			process.env.NODE_ENV === 'development'
-// 				? ['query', 'error', 'warn']
-// 				: ['error'],
+// 		log: [
+// 			{ level: 'error', emit: 'stdout' },
+// 			{ level: 'warn', emit: 'stdout' },
+// 		],
+// 		datasources: {
+// 			db: {
+// 				url: process.env.DATABASE_URL,
+// 			},
+// 		},
 // 	});
 // };
-
-// // Define the global variable type
-// type PrismaClientSingleton = ReturnType<typeof prismaClientSingleton>;
-
-// // Define globalThis interface extension
-// declare global {
-// 	var prisma: PrismaClientSingleton | undefined;
-// }
 
 // // Export the Prisma client instance
 // export const prisma = globalThis.prisma ?? prismaClientSingleton();
 
 // // In development, keep the instance alive between reloads
-// if (process.env.NODE_ENV !== 'production') globalThis.prisma = prisma;
+// if (process.env.NODE_ENV !== 'production') {
+// 	globalThis.prisma = prisma;
+// }
 
-import { PrismaClient } from '@prisma/client';
+// // Test database connection function
+// export async function testDatabaseConnection(): Promise<boolean> {
+// 	try {
+// 		await prisma.$connect();
+// 		console.log('Database connection successful');
+// 		return true;
+// 	} catch (error) {
+// 		console.error('Database connection failed:', error);
+// 		return false;
+// 	}
+// }
 
-// Create a singleton instance of PrismaClient
-const prismaClientSingleton = () => {
-	return new PrismaClient({
-		log: [
-			{ level: 'error', emit: 'event' },
-			{ level: 'warn', emit: 'event' },
-			{ level: 'info', emit: 'event' },
-			{ level: 'query', emit: 'event' },
-		],
+// src/lib/prisma.ts
+import { Prisma, PrismaClient } from '@prisma/client';
+
+// Define global type for PrismaClient instance
+declare global {
+	// eslint-disable-next-line no-var
+	var prisma: PrismaClient | undefined;
+}
+
+// Configure and instantiate Prisma client
+function createPrismaClient(): PrismaClient {
+	// Set log levels based on environment
+	const logLevels: Prisma.LogLevel[] =
+		process.env.NODE_ENV === 'production'
+			? ['error']
+			: ['error', 'warn', 'info', 'query'];
+
+	// Create a new Prisma client instance with appropriate configuration
+	const client = new PrismaClient({
+		log: logLevels,
+
+		// This ensures we use the correct connection URL
 		datasources: {
 			db: {
 				url: process.env.DATABASE_URL,
 			},
 		},
 	});
-};
 
-// Define the global variable type
-type PrismaClientSingleton = ReturnType<typeof prismaClientSingleton>;
+	// Error handling and logging configuration
+	if (process.env.NODE_ENV !== 'production') {
+		// More verbose logging in development
+		console.log(
+			'Prisma Client initialized in development mode with extended logging'
+		);
+	}
 
-// Define globalThis interface extension
-declare global {
-	var prisma: PrismaClientSingleton | undefined;
+	return client;
 }
 
-// Export the Prisma client instance
-export const prisma = globalThis.prisma ?? prismaClientSingleton();
+// Use singleton pattern to avoid multiple instances during hot reloads in development
+export const prisma = globalThis.prisma || createPrismaClient();
 
-// Add error logging
-prisma.$on('error', (event) => {
-	console.error('Prisma Error:', event);
-});
-
-prisma.$on('warn', (event) => {
-	console.warn('Prisma Warning:', event);
-});
-
-// In development, keep the instance alive between reloads
+// In development, preserve the client between hot reloads
 if (process.env.NODE_ENV !== 'production') {
 	globalThis.prisma = prisma;
 }
 
-// Optional: Add a connection test function
-export async function testDatabaseConnection() {
+// Test database connection function
+export async function testDatabaseConnection(): Promise<boolean> {
 	try {
+		// Test the connection
 		await prisma.$connect();
-		console.log('Database connection successful');
+
+		// Execute a simple query to verify database access
+		await prisma.$queryRaw`SELECT 1 as connection_test`;
+
+		console.log('✅ Database connection successful');
 		return true;
 	} catch (error) {
-		console.error('Database connection failed:', error);
+		console.error('❌ Database connection failed:', error);
+
+		// Provide more detailed error information based on error type
+		if (error instanceof Prisma.PrismaClientInitializationError) {
+			console.error(
+				'Failed to initialize the Prisma client. Check your DATABASE_URL.'
+			);
+		} else if (error instanceof Prisma.PrismaClientKnownRequestError) {
+			console.error(
+				`Known request error: ${error.message} (Code: ${error.code})`
+			);
+		} else if (error instanceof Error) {
+			console.error(`Error message: ${error.message}`);
+		}
+
 		return false;
-	} finally {
+	}
+}
+
+// Handle application shutdown
+export async function disconnectPrisma(): Promise<void> {
+	try {
 		await prisma.$disconnect();
+		console.log('Prisma client disconnected successfully');
+	} catch (error) {
+		console.error('Error disconnecting Prisma client:', error);
+		process.exit(1);
 	}
 }

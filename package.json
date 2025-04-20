@@ -7,23 +7,26 @@
 		"test:network": "npx ts-node scripts/networkTest.ts",
 		"test:postgres": "npx ts-node scripts/postgresTest.ts",
 		"start": "node build/app.js",
-		"build:app": "npx tsc src/app.ts --outDir build/ --esModuleInterop true",
-		"build:collect": "npx tsc src/collect.ts --outDir build/ --esModuleInterop true",
-		"build:analyze": "npx tsc src/analyze.ts --outDir build/ --esModuleInterop true",
-		"collect": "npm run build:collect && node build/collect.js",
-		"analyze": "npm run build:analyze && node build/analyze.js",
+		"dev": "nodemon src/app.ts",
+		"build": "npx prisma generate && tsc",
+		"postbuild": "mkdir -p build/data && cp -r src/views src/public build/",
+		"collect": "ts-node src/collect.ts",
+		"analyze": "ts-node src/analyze.ts",
 		"daily-quotes": "./bin/daily-quotes.sh",
-		"build": "npx prisma generate && tsc src/app.ts --outDir build/ --esModuleInterop true && tsc && cp -r src/views src/public src/routes src/lib src/databaseSupport src/webSupport src/generated/prisma/ src/testSupport databases bin scripts build/",
 		"clean": "rm -rf ./build",
 		"watch": "nodemon src/app.ts",
-		"pretest": "npx ts-node scripts/checkStatus.ts",
 		"test": "tsc --noEmit && vitest run",
 		"prisma:generate": "prisma generate",
 		"prisma:migrate:dev": "prisma migrate dev",
 		"prisma:migrate:deploy": "prisma migrate deploy",
 		"prisma:seed": "npx ts-node prisma/seed.ts",
 		"prisma:studio": "prisma studio",
-		"migrate:to:supabase": "npx ts-node scripts/migrateToSupabase.ts"
+		"migrate:to:supabase": "npx ts-node scripts/migrateToSupabase.ts",
+		"docker:build": "docker build --platform linux/amd64 -t us-central1-docker.pkg.dev/softwareproject-454304/new-project/mind-bloom:latest .",
+		"docker:run": "docker run -p 8080:8080 --env-file .env us-central1-docker.pkg.dev/softwareproject-454304/new-project/mind-bloom:latest",
+		"gcloud:push": "docker push us-central1-docker.pkg.dev/softwareproject-454304/new-project/mind-bloom:latest",
+		"gcloud:deploy": "gcloud run deploy mind-bloom --image us-central1-docker.pkg.dev/softwareproject-454304/new-project/mind-bloom:latest --platform managed --region us-central1 --allow-unauthenticated",
+		"deploy": "npm run docker:build && npm run gcloud:push && npm run gcloud:deploy"
 	},
 	"author": "Meghan31",
 	"license": "ISC",
@@ -51,5 +54,8 @@
 		"ts-node": "^10.9.2",
 		"typescript": "^5.7.3",
 		"vitest": "^3.0.7"
+	},
+	"engines": {
+		"node": ">=20.0.0"
 	}
 }
