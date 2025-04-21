@@ -17,7 +17,10 @@ const staticFileHandler_1 = require("./webSupport/staticFileHandler");
 const configureApp = (environment) => (app) => {
     // Middleware
     app.use((0, cors_1.default)({
-        origin: '*', // Or specify your frontend domains
+        origin: [
+            'https://fse-mindbloom-k3kv.vercel.app',
+            'http://localhost:5173',
+        ], // Or specify your frontend domains
         methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
         allowedHeaders: ['Content-Type', 'Authorization'],
         preflightContinue: false,

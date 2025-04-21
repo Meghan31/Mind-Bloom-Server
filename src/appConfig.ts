@@ -15,7 +15,10 @@ export const configureApp = (environment: Environment) => (app: Express) => {
 	// Middleware
 	app.use(
 		cors({
-			origin: '*', // Or specify your frontend domains
+			origin: [
+				'https://fse-mindbloom-k3kv.vercel.app',
+				'http://localhost:5173',
+			], // Or specify your frontend domains
 			methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
 			allowedHeaders: ['Content-Type', 'Authorization'],
 			preflightContinue: false,
