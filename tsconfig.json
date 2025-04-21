@@ -1,32 +1,3 @@
-// {
-// 	"include": [
-// 		"src",
-// 		"prisma",
-// 		"scripts",
-// 		"databases",
-// 		"bin",
-// 		"src/collect.ts",
-// 		"src/analyze.ts"
-// 	],
-// 	"exclude": ["src/**/*.test.ts", "src/testSupport/**/*", "build/**/*"],
-// 	"compilerOptions": {
-// 		"target": "ESNext",
-// 		"lib": ["ESNext"],
-// 		"allowJs": false,
-// 		"skipLibCheck": true,
-// 		"esModuleInterop": true,
-// 		"allowSyntheticDefaultImports": true,
-// 		"strict": true,
-// 		"forceConsistentCasingInFileNames": true,
-// 		"module": "commonjs",
-// 		"moduleResolution": "Node",
-// 		"resolveJsonModule": true,
-// 		"isolatedModules": true,
-// 		"noImplicitAny": true,
-// 		"outDir": "./build"
-// 	}
-// }
-
 {
 	"include": [
 		"src",

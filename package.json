@@ -21,12 +21,7 @@
 		"prisma:generate": "prisma generate",
 		"prisma:migrate:dev": "prisma migrate dev",
 		"prisma:migrate:deploy": "prisma migrate deploy",
-		"prisma:seed": "npx ts-node prisma/seed.ts",
-		"docker:build": "docker build --platform linux/amd64 -t us-central1-docker.pkg.dev/softwareproject-454304/new-project/mind-bloom:latest .",
-		"docker:run": "docker run -p 8080:8080 --env-file .env us-central1-docker.pkg.dev/softwareproject-454304/new-project/mind-bloom:latest",
-		"gcloud:push": "docker push us-central1-docker.pkg.dev/softwareproject-454304/new-project/mind-bloom:latest",
-		"gcloud:deploy": "gcloud run deploy mind-bloom --image us-central1-docker.pkg.dev/softwareproject-454304/new-project/mind-bloom:latest --platform managed --region us-central1 --allow-unauthenticated --set-env-vars NODE_ENV=production",
-		"deploy": "npm run build && npm run docker:build && npm run gcloud:push && npm run gcloud:deploy"
+		"prisma:seed": "npx ts-node prisma/seed.ts"
 	},
 	"author": "Meghan31",
 	"license": "ISC",
