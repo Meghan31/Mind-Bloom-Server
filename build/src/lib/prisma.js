@@ -79,10 +79,10 @@ exports.disconnectPrisma = disconnectPrisma;
 // 	}
 // }
 // src/lib/prisma.ts
-// import { PrismaClient } from '@prisma/client';
-const prisma_1 = require("../../build/generated/prisma");
+const client_1 = require("@prisma/client");
+// import { PrismaClient } from '../../build/generated/prisma';
 // Create a simple PrismaClient instance
-exports.prisma = new prisma_1.PrismaClient({
+exports.prisma = new client_1.PrismaClient({
     datasources: {
         db: {
             url: process.env.DATABASE_URL,

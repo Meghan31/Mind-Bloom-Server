@@ -89,8 +89,8 @@
 // }
 
 // src/lib/prisma.ts
-// import { PrismaClient } from '@prisma/client';
-import { PrismaClient } from '../../build/generated/prisma';
+import { PrismaClient } from '@prisma/client';
+// import { PrismaClient } from '../../build/generated/prisma';
 
 // Create a simple PrismaClient instance
 export const prisma = new PrismaClient({
