@@ -135,9 +135,7 @@ const registerAuthRoutes = (app) => {
             }
             catch (dbError) {
                 console.error('Database error during registration:', dbError);
-                res
-                    .status(500)
-                    .json({
+                res.status(500).json({
                     error: 'Database error occurred',
                     details: dbError.message,
                 });
@@ -179,7 +177,7 @@ const registerAuthRoutes = (app) => {
                     userId: user.id,
                     email: user.email,
                     username: user.username,
-                }, JWT_SECRET, { expiresIn: '24h' });
+                }, JWT_SECRET, { expiresIn: parseInt(JWT_EXPIRATION, 10) || '24h' });
                 console.log(`User logged in successfully: ${email}`);
                 // Return user info and token
                 res.status(200).json({
@@ -194,9 +192,7 @@ const registerAuthRoutes = (app) => {
             }
             catch (dbError) {
                 console.error('Database error during login:', dbError);
-                res
-                    .status(500)
-                    .json({
+                res.status(500).json({
                     error: 'Database error occurred',
                     details: dbError.message,
                 });

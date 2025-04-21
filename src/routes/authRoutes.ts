@@ -154,12 +154,10 @@ export const registerAuthRoutes = (app: Express) => {
 				res.status(201).json({ message: 'User registered successfully' });
 			} catch (dbError) {
 				console.error('Database error during registration:', dbError);
-				res
-					.status(500)
-					.json({
-						error: 'Database error occurred',
-						details: (dbError as Error).message,
-					});
+				res.status(500).json({
+					error: 'Database error occurred',
+					details: (dbError as Error).message,
+				});
 			}
 		} catch (error) {
 			console.error('Registration error:', error);
@@ -210,7 +208,7 @@ export const registerAuthRoutes = (app: Express) => {
 						username: user.username,
 					},
 					JWT_SECRET,
-					{ expiresIn: '24h' }
+					{ expiresIn: parseInt(JWT_EXPIRATION, 10) || '24h' }
 				);
 
 				console.log(`User logged in successfully: ${email}`);
@@ -226,12 +224,10 @@ export const registerAuthRoutes = (app: Express) => {
 				});
 			} catch (dbError) {
 				console.error('Database error during login:', dbError);
-				res
-					.status(500)
-					.json({
-						error: 'Database error occurred',
-						details: (dbError as Error).message,
-					});
+				res.status(500).json({
+					error: 'Database error occurred',
+					details: (dbError as Error).message,
+				});
 			}
 		} catch (error) {
 			console.error('Login error:', error);
