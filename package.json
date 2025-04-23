@@ -16,7 +16,7 @@
 		"dev": "nodemon --exec ts-node src/app.ts",
 		"prebuild": "prisma generate",
 		"build": "prisma generate && tsc",
-		"postbuild": "cp -r src/views src/public build/src/",
+		"postbuild": "cp -r src/views src/public build/src/ && cp -r bin data build/ && chmod +x build/bin/*.sh",
 		"postinstall": "prisma generate",
 		"collect": "ts-node src/collect.ts",
 		"analyze": "ts-node src/analyze.ts",
