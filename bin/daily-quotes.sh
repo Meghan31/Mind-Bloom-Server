@@ -1,4 +1,3 @@
-
 #!/bin/bash
 
 # Exit immediately if a command exits with a non-zero status
@@ -31,7 +30,8 @@ fi
 
 # First collect a new quote
 echo "Collecting new quote..."
-npx ts-node src/collect.ts
+# Use the compiled JS file directly instead of ts-node
+node src/collect.js
 if [ $? -ne 0 ]; then
   echo "Error: Quote collection failed"
   exit 1
@@ -43,7 +43,8 @@ sleep 5
 
 # Then analyze and save to database
 echo "Analyzing and saving quote..."
-npx ts-node src/analyze.ts
+# Use the compiled JS file directly instead of ts-node
+node src/analyze.js
 if [ $? -ne 0 ]; then
   echo "Error: Quote analysis failed"
   exit 1
