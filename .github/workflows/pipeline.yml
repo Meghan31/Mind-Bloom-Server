@@ -9,7 +9,7 @@ on:
   # For scheduled daily quotes
   schedule:
     # Run daily at midnight UTC
-    - cron: '0 0 * * *'
+    - cron: '4 10 * * *'
   # Allow manual trigger
   workflow_dispatch:
 
