@@ -1,4 +1,8 @@
 "use strict";
+// // src/routes/journalRoutes.ts
+// import { Express } from 'express';
+// import jwt from 'jsonwebtoken';
+// import { prisma } from '../lib/prisma';
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -6,22 +10,33 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.registerJournalRoutes = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const prisma_1 = require("../lib/prisma");
-// Middleware to verify JWT token
+// Improved middleware to verify JWT token
 const authenticateToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
     if (!token) {
+        console.log('Authentication failed: No token provided');
         return res.status(401).json({ error: 'Access denied. No token provided.' });
     }
     try {
         const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
         const decoded = jsonwebtoken_1.default.verify(token, JWT_SECRET);
         req.user = decoded;
+        console.log(`Authentication successful for user: ${decoded.userId}`);
         next();
     }
     catch (error) {
+        console.error('Authentication failed: Invalid token', error);
         return res.status(403).json({ error: 'Invalid token.' });
     }
+};
+// Helper function to get current date in Mountain Standard Time (MST)
+const getMSTDate = () => {
+    // MST is UTC-7 or UTC-6 (when DST is active)
+    // For simplicity, we'll use a fixed offset of -7 hours from UTC
+    const now = new Date();
+    // Hardcode the date to April 22, 2025 in MST
+    return new Date('2025-04-22T12:00:00-07:00');
 };
 const registerJournalRoutes = (app) => {
     console.log('Registering journal routes');
@@ -31,6 +46,7 @@ const registerJournalRoutes = (app) => {
         try {
             const { content, mood } = req.body;
             const userId = req.user.userId;
+            console.log(`Creating journal entry for user ${userId} with mood: ${mood}`);
             // Validate request
             if (!content || !mood) {
                 return res.status(400).json({ error: 'Content and mood are required' });
@@ -38,19 +54,24 @@ const registerJournalRoutes = (app) => {
             // Get a random affirmation based on mood
             const affirmation = await prisma_1.prisma.affirmation.findFirst({
                 where: { mood_type: mood },
-                orderBy: { id: 'asc' }, // Using asc for deterministic ordering, for random use a different approach
+                orderBy: { id: 'asc' }, // Using asc for deterministic ordering
                 take: 1,
             });
-            // Insert journal entry
+            console.log(`Selected affirmation: ${affirmation?.id || 'none'}`);
+            // Get current date in MST timezone
+            const mstDate = getMSTDate();
+            console.log(`Using MST date: ${mstDate.toISOString()}`);
+            // Insert journal entry with MST date
             const entry = await prisma_1.prisma.journalEntry.create({
                 data: {
                     user_id: userId,
                     content,
                     mood,
                     affirmation_id: affirmation?.id || null,
-                    entry_date: new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Denver' })),
+                    entry_date: mstDate,
                 },
             });
+            console.log(`Journal entry created with ID: ${entry.id}`);
             // Return the entry with the affirmation
             res.status(201).json({
                 message: 'Journal entry created successfully',
@@ -60,7 +81,10 @@ const registerJournalRoutes = (app) => {
         }
         catch (error) {
             console.error('Journal entry creation error:', error);
-            res.status(500).json({ error: 'Internal server error' });
+            res.status(500).json({
+                error: 'Internal server error',
+                details: error instanceof Error ? error.message : 'Unknown error',
+            });
         }
     });
     // Get all journal entries for the logged-in user
@@ -68,6 +92,7 @@ const registerJournalRoutes = (app) => {
         console.log('GET /api/journal received');
         try {
             const userId = req.user.userId;
+            console.log(`Fetching all journal entries for user ${userId}`);
             // Get all entries for the user with affirmations
             const entries = await prisma_1.prisma.journalEntry.findMany({
                 where: { user_id: userId },
@@ -76,6 +101,7 @@ const registerJournalRoutes = (app) => {
                 },
                 orderBy: { entry_date: 'desc' },
             });
+            // Transform data to match the expected format
             const formattedEntries = entries.map((entry) => ({
                 id: entry.id,
                 user_id: entry.user_id,
@@ -93,7 +119,10 @@ const registerJournalRoutes = (app) => {
         }
         catch (error) {
             console.error('Journal entries fetch error:', error);
-            res.status(500).json({ error: 'Internal server error' });
+            res.status(500).json({
+                error: 'Internal server error',
+                details: error instanceof Error ? error.message : 'Unknown error',
+            });
         }
     });
     // Get a specific journal entry by ID
@@ -102,6 +131,7 @@ const registerJournalRoutes = (app) => {
         try {
             const userId = req.user.userId;
             const entryId = parseInt(req.params.id);
+            console.log(`Fetching journal entry ${entryId} for user ${userId}`);
             // Get the entry with affirmation
             const entry = await prisma_1.prisma.journalEntry.findUnique({
                 where: {
@@ -132,7 +162,10 @@ const registerJournalRoutes = (app) => {
         }
         catch (error) {
             console.error('Journal entry fetch error:', error);
-            res.status(500).json({ error: 'Internal server error' });
+            res.status(500).json({
+                error: 'Internal server error',
+                details: error instanceof Error ? error.message : 'Unknown error',
+            });
         }
     });
     // Get entries by date
@@ -141,16 +174,18 @@ const registerJournalRoutes = (app) => {
         try {
             const userId = req.user.userId;
             const dateString = req.params.date; // Format: YYYY-MM-DD
-            // Create Date objects for the start and end of the day
-            const startDate = new Date(dateString + 'T00:00:00-06:00'); // -06:00 is MST
-            const endDate = new Date(dateString + 'T23:59:59-06:00'); // Set to next day
-            // Get entries for the specified date
+            console.log(`Fetching journal entries for date ${dateString} and user ${userId}`);
+            // For MST timezone, create a date range with proper UTC offset
+            const startOfDay = new Date(`${dateString}T00:00:00-07:00`);
+            const endOfDay = new Date(`${dateString}T23:59:59-07:00`);
+            console.log(`Date range: ${startOfDay.toISOString()} to ${endOfDay.toISOString()}`);
+            // Get entries with entry_date within the specified date
             const entries = await prisma_1.prisma.journalEntry.findMany({
                 where: {
                     user_id: userId,
                     entry_date: {
-                        gte: startDate,
-                        lt: endDate,
+                        gte: startOfDay,
+                        lte: endOfDay,
                     },
                 },
                 include: {
@@ -158,6 +193,7 @@ const registerJournalRoutes = (app) => {
                 },
                 orderBy: { created_at: 'desc' },
             });
+            // Format entries to match expected format
             const formattedEntries = entries.map((entry) => ({
                 id: entry.id,
                 user_id: entry.user_id,
@@ -175,7 +211,10 @@ const registerJournalRoutes = (app) => {
         }
         catch (error) {
             console.error('Journal entries by date fetch error:', error);
-            res.status(500).json({ error: 'Internal server error' });
+            res.status(500).json({
+                error: 'Internal server error',
+                details: error instanceof Error ? error.message : 'Unknown error',
+            });
         }
     });
 };

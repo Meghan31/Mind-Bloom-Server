@@ -3,6 +3,8 @@
 	"version": "1.0.0",
 	"main": "build/app.js",
 	"scripts": {
+		"pretest": "npx ts-node scripts/checkStatus.ts",
+		"test": "tsc --noEmit && vitest run",
 		"test:db": "npx ts-node scripts/testDatabaseConnection.ts",
 		"test:network": "npx ts-node scripts/networkTest.ts",
 		"test:postgres": "npx ts-node scripts/postgresTest.ts",
