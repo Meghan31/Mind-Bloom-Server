@@ -12,7 +12,7 @@ APP_DIR="$(dirname "$SCRIPT_DIR")"
 cd $APP_DIR
 
 # Check if the compiled file exists
-if [ ! -f "build/collect.js" ]; then
+if [ ! -f "build/src/collect.js" ]; then
   echo "collect.js not found, compiling..."
   # Compile just collect.ts
   npx tsc src/collect.ts --outDir build/ --esModuleInterop true --resolveJsonModule true

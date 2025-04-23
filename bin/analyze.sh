@@ -12,7 +12,7 @@ APP_DIR="$(dirname "$SCRIPT_DIR")"
 cd $APP_DIR
 
 # Check if the compiled file exists
-if [ ! -f "build/analyze.js" ]; then
+if [ ! -f "build/src/analyze.js" ]; then
   echo "analyze.js not found, compiling..."
   # Compile just analyze.ts
   npx tsc src/analyze.ts --outDir build/ --esModuleInterop true --resolveJsonModule true
