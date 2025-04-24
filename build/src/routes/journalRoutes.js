@@ -1,8 +1,4 @@
 "use strict";
-// // src/routes/journalRoutes.ts
-// import { Express } from 'express';
-// import jwt from 'jsonwebtoken';
-// import { prisma } from '../lib/prisma';
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -32,11 +28,11 @@ const authenticateToken = (req, res, next) => {
 };
 // Helper function to get current date in Mountain Standard Time (MST)
 const getMSTDate = () => {
-    // MST is UTC-7 or UTC-6 (when DST is active)
-    // For simplicity, we'll use a fixed offset of -7 hours from UTC
+    // Create a new date object for the current time
     const now = new Date();
-    // Hardcode the date to April 22, 2025 in MST
-    return new Date('2025-04-22T12:00:00-07:00');
+    // Get the date in Mountain time (UTC-7 or UTC-6 depending on daylight saving)
+    // For more accuracy, we can use the Intl.DateTimeFormat API to get the proper timezone
+    return new Date(now.toLocaleString('en-US', { timeZone: 'America/Denver' }));
 };
 const registerJournalRoutes = (app) => {
     console.log('Registering journal routes');
