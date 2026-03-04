@@ -18,46 +18,60 @@ const IS_PROD = process.env.NODE_ENV === 'production';
 const getAllowedOrigins = (): string[] => {
 	const envOrigins = process.env.ALLOWED_ORIGINS;
 	if (envOrigins) {
-		return envOrigins.split(',').map((o) => o.trim()).filter(Boolean);
+		return envOrigins
+			.split(',')
+			.map((o) => o.trim())
+			.filter(Boolean);
 	}
-	return ['http://localhost:5173', 'http://localhost:3000', 'http://127.0.0.1:5173'];
+	return [
+		'http://localhost:5173',
+		'http://localhost:3000',
+		'http://127.0.0.1:5173',
+	];
 };
 
 export const configureApp = (_environment: Environment) => (app: Express) => {
 	// ── Trust proxy (required for accurate IP with Vercel / nginx) ──
 	app.set('trust proxy', 1);
 
+	// ── CORS — must be first, before every other middleware ───────
+	// Handles preflight OPTIONS before helmet / rate-limiter can
+	// swallow the request during a Vercel cold-start.
+	const allowedOrigins = getAllowedOrigins();
+	const corsOptions: cors.CorsOptions = {
+		origin: (origin, callback) => {
+			// Allow requests without Origin header (curl, Postman, health checks)
+			if (!origin) return callback(null, true);
+			if (allowedOrigins.includes(origin)) return callback(null, true);
+			callback(new Error(`CORS_BLOCKED:${origin}`));
+		},
+		methods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
+		allowedHeaders: ['Content-Type', 'Authorization'],
+		credentials: true,
+		optionsSuccessStatus: 204,
+	};
+
+	// Respond to all preflight requests immediately — before any other middleware
+	app.options('*', cors(corsOptions));
+	app.use(cors(corsOptions));
+
 	// ── Security headers ─────────────────────────────────────────
 	app.use(
 		helmet({
-			contentSecurityPolicy: false,      // API server — no strict CSP needed
+			contentSecurityPolicy: false, // API server — no strict CSP needed
 			crossOriginEmbedderPolicy: false,
-		})
-	);
-
-	// ── CORS — restrict to known frontend origins ─────────────────
-	const allowedOrigins = getAllowedOrigins();
-	app.use(
-		cors({
-			origin: (origin, callback) => {
-				// Allow requests without Origin header (curl, Postman, health checks)
-				if (!origin) return callback(null, true);
-				if (allowedOrigins.includes(origin)) return callback(null, true);
-				callback(new Error(`CORS_BLOCKED:${origin}`));
-			},
-			methods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
-			allowedHeaders: ['Content-Type', 'Authorization'],
-			credentials: true,
-			optionsSuccessStatus: 204,
-		})
+		}),
 	);
 
 	// ── Body parsing — hard cap at 50 KB ─────────────────────────
 	app.use(express.json({ limit: '50kb' }));
 	app.use(express.urlencoded({ extended: false, limit: '50kb' }));
 
-	// ── Global rate limiter ───────────────────────────────────────
-	app.use(globalLimiter);
+	// ── Global rate limiter — skip OPTIONS (already handled above) ─
+	app.use((req, res, next) => {
+		if (req.method === 'OPTIONS') return next();
+		return globalLimiter(req, res, next);
+	});
 
 	// ── Non-sensitive request logger ──────────────────────────────
 	app.use((req: Request, _res: Response, next: NextFunction) => {
@@ -114,6 +128,4 @@ export const configureApp = (_environment: Environment) => (app: Express) => {
 			...(IS_PROD ? {} : { detail: msg }),
 		});
 	});
-
-	console.log(`[Config] Origins allowed: ${allowedOrigins.join(', ')}`);
 };
