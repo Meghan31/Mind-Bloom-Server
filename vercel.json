@@ -1,5 +1,6 @@
 {
 	"version": 2,
+	"buildCommand": "npm run build",
 	"builds": [
 		{
 			"src": "build/src/app.js",
@@ -7,6 +8,18 @@
 		}
 	],
 	"routes": [
+		{
+			"src": "/(.*)",
+			"methods": ["OPTIONS"],
+			"headers": {
+				"Access-Control-Allow-Origin": "https://lovemindbloom.vercel.app",
+				"Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
+				"Access-Control-Allow-Headers": "Content-Type, Authorization",
+				"Access-Control-Allow-Credentials": "true",
+				"Access-Control-Max-Age": "86400"
+			},
+			"status": 204
+		},
 		{
 			"src": "/(.*)",
 			"dest": "build/src/app.js"
