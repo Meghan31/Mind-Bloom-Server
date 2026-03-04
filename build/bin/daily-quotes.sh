@@ -1,4 +1,5 @@
-# #!/bin/bash
+
+#!/bin/bash
 
 # Exit immediately if a command exits with a non-zero status
 set -e
@@ -28,30 +29,9 @@ if [ -z "$OPENAI_API_KEY" ]; then
   exit 1
 fi
 
-# Use the node from the path if available
-if command -v node &> /dev/null; then
-    NODE_CMD="node"
-else
-    # Try to find node in common locations
-    for possible_node in /usr/bin/node /usr/local/bin/node /opt/node/bin/node /app/node_modules/.bin/node; do
-        if [ -x "$possible_node" ]; then
-            NODE_CMD="$possible_node"
-            break
-        fi
-    done
-    
-    # If we still don't have node, exit with error
-    if [ -z "$NODE_CMD" ]; then
-        echo "Error: Node.js not found"
-        exit 1
-    fi
-fi
-
-echo "Using Node.js at: $NODE_CMD"
-
 # First collect a new quote
 echo "Collecting new quote..."
-$NODE_CMD build/src/collect.js
+npx ts-node src/collect.ts
 if [ $? -ne 0 ]; then
   echo "Error: Quote collection failed"
   exit 1
@@ -63,7 +43,7 @@ sleep 5
 
 # Then analyze and save to database
 echo "Analyzing and saving quote..."
-$NODE_CMD build/src/analyze.js
+npx ts-node src/analyze.ts
 if [ $? -ne 0 ]; then
   echo "Error: Quote analysis failed"
   exit 1

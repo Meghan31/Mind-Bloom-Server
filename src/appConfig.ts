@@ -23,7 +23,9 @@ const getAllowedOrigins = (): string[] => {
 			.map((o) => o.trim())
 			.filter(Boolean);
 	}
+	// Default: include the known production frontend + local dev
 	return [
+		'https://lovemindbloom.vercel.app',
 		'http://localhost:5173',
 		'http://localhost:3000',
 		'http://127.0.0.1:5173',
@@ -73,11 +75,13 @@ export const configureApp = (_environment: Environment) => (app: Express) => {
 		return globalLimiter(req, res, next);
 	});
 
-	// ── Non-sensitive request logger ──────────────────────────────
-	app.use((req: Request, _res: Response, next: NextFunction) => {
-		console.log(`${new Date().toISOString()} ${req.method} ${req.path}`);
-		next();
-	});
+	// ── Request logger — development only ───────────────────────
+	if (!IS_PROD) {
+		app.use((req: Request, _res: Response, next: NextFunction) => {
+			console.log(`${new Date().toISOString()} ${req.method} ${req.path}`);
+			next();
+		});
+	}
 
 	// ── Static / template pages ───────────────────────────────────
 	index.registerHandler(app);
